@@ -1,40 +1,54 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/pages/api-reference/create-next-app).
+# 🚀Gestor de Citas – Frontend
 
-## Getting Started
+## 📌Descripción
+Este es el **frontend del sistema Gestor de Citas**, una aplicación web que permite a los usuarios reservar servicios de forma sencilla y a los administradores gestionar todo el flujo de atención. La interfaz está diseñada para ser intuitiva, moderna y responsiva, brindando una experiencia fluida tanto para clientes como para administradores.
 
-First, run the development server:
+**Clientes:**
+- Registro e inicio de sesión.
+- Visualización de servicios disponibles.
+- Consulta de horarios disponibles en tiempo real.
+- Creación y cancelación de citas.
+- Visualización del historial de citas.
+
+**Administradores:**
+- Gestión de servicios (crear, editar, activar o desactivar).
+- Gestión de horarios laborales.
+- Bloqueo de días no disponibles.
+- Visualización y control de todas las citas.
+- Cambio de estado de las citas.
+
+## 🛠️Tecnologías utilizadas
+
+- **Framework:** Next.js
+- **Consumo de APIs:** Axios
+- **Calendario Visual de Citas:** FullCalendar
+- **Estilos:** Emotion Styled
+- **Iconos:** FontAwesome
+- **Gestor de paquetes:** Yarn
+
+## ⚙️Instalación y ejecución
 
 ```bash
-npm run dev
-# or
+# 1. Clonar el repositorio
+git clone https://github.com/tu-usuario/frontend-appointments.git
+
+# 2. Instalar dependencias
+yarn install
+
+# 3. Ejecutar la aplicación
 yarn dev
-# or
-pnpm dev
-# or
-bun dev
+
+# 4. Abrir en el navegador
+http://localhost:3000
+
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+## ✨Características principales
+- Interfaz moderna y responsiva.
+- Calendario interactivo para selección de citas.
+- Control de acceso según rol.
+- Comunicación segura con el backend.
+- Experiencia de usuario fluida.
 
-You can start editing the page by modifying `pages/index.js`. The page auto-updates as you edit the file.
-
-[API routes](https://nextjs.org/docs/pages/building-your-application/routing/api-routes) can be accessed on [http://localhost:3000/api/hello](http://localhost:3000/api/hello). This endpoint can be edited in `pages/api/hello.js`.
-
-The `pages/api` directory is mapped to `/api/*`. Files in this directory are treated as [API routes](https://nextjs.org/docs/pages/building-your-application/routing/api-routes) instead of React pages.
-
-This project uses [`next/font`](https://nextjs.org/docs/pages/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
-
-## Learn More
-
-To learn more about Next.js, take a look at the following resources:
-
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn-pages-router) - an interactive Next.js tutorial.
-
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
-
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/pages/building-your-application/deploying) for more details.
+## 🔗Enlaces útiles
+Backend: https://github.com/EdannyDev/backend-appointments
