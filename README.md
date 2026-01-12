@@ -51,4 +51,4 @@ http://localhost:3000
 - Experiencia de usuario fluida.
 
 ## 🔗Enlaces útiles
-Backend: https://github.com/EdannyDev/backend-appointments
+Backend: https://github.com/EdannyDev/backend-appointment
