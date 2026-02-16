@@ -1,54 +1,45 @@
-# 🚀Gestor de Citas – Frontend
+# 🚀 Appointment Management System – Frontend
 
-## 📌Descripción
-Este es el **frontend del sistema Gestor de Citas**, una aplicación web que permite a los usuarios reservar servicios de forma sencilla y a los administradores gestionar todo el flujo de atención. La interfaz está diseñada para ser intuitiva, moderna y responsiva, brindando una experiencia fluida tanto para clientes como para administradores.
+## 📌 Overview
+Appointment Management Frontend is a Next.js application that provides an interactive scheduling interface with real-time availability visualization.
 
-**Clientes:**
-- Registro e inicio de sesión.
-- Visualización de servicios disponibles.
-- Consulta de horarios disponibles en tiempo real.
-- Creación y cancelación de citas.
-- Visualización del historial de citas.
+It integrates a dynamic calendar system and enforces role-based UI control.
 
-**Administradores:**
-- Gestión de servicios (crear, editar, activar o desactivar).
-- Gestión de horarios laborales.
-- Bloqueo de días no disponibles.
-- Visualización y control de todas las citas.
-- Cambio de estado de las citas.
+## 🎨 UI & Architecture
 
-## 🛠️Tecnologías utilizadas
+- Feature-based page structure  
+- Reusable components  
+- Axios-based API communication  
+- FullCalendar integration  
+- Role-based route protection  
 
-- **Framework:** Next.js
-- **Consumo de APIs:** Axios
-- **Calendario Visual de Citas:** FullCalendar
-- **Estilos:** Emotion Styled
-- **Iconos:** FontAwesome
-- **Gestor de paquetes:** Yarn
+The application emphasizes clarity, responsiveness and scheduling usability.
 
-## ⚙️Instalación y ejecución
+## 🔐 Authentication Handling
+
+- Secure session handling via HttpOnly cookies (managed by backend)  
+- Role-based rendering  
+- Protected routes  
+- Automatic redirection for unauthorized users  
+
+## 📊 Core Features
+
+- Interactive appointment calendar  
+- Service selection module  
+- Booking & cancellation flow  
+- Administrative control dashboard  
+- Business hour configuration interface  
+
+## 🛠 Tech Stack
+
+`Next.js` · `React` · `Axios`  
+
+`FullCalendar` · `Emotion Styled` · `FontAwesome` · `Yarn`  
+
+## ⚙️ Local Setup
 
 ```bash
-# 1. Clonar el repositorio
-git clone https://github.com/tu-usuario/frontend-appointments.git
-
-# 2. Instalar dependencias
-yarn install
-
-# 3. Ejecutar la aplicación
+git clone https://github.com/EdannyDev/frontend-appointment.git  
+yarn install  
 yarn dev
-
-# 4. Abrir en el navegador
-http://localhost:3000
-
-```
-
-## ✨Características principales
-- Interfaz moderna y responsiva.
-- Calendario interactivo para selección de citas.
-- Control de acceso según rol.
-- Comunicación segura con el backend.
-- Experiencia de usuario fluida.
-
-## 🔗Enlaces útiles
-Backend: https://github.com/EdannyDev/backend-appointment
+``` 
