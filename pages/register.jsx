@@ -1,9 +1,11 @@
+import { useState, useMemo } from "react";
 import { useRouter } from "next/router";
+import { logger } from "@/utils/logger";
 import api from "@/lib/axiosInstance";
-import { useState } from "react";
 import {
   Page,
   Card,
+  CardBody,
   Header,
   Title,
   Subtitle,
@@ -14,128 +16,145 @@ import {
   IconWrapper,
   Input,
   Button,
-  Message,
   Footer,
-  LinkText
+  LinkText,
+  TogglePassword,
+  StrengthBar,
+  StrengthSegment,
+  StrengthLabel
 } from "@/styles/register.styles";
+import { Notification } from "@/components/notification";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faUser, faEnvelope, faLock } from "@fortawesome/free-solid-svg-icons";
+import { getPasswordStrength, STRENGTH_LABELS, STRENGTH_COLORS } from "@/utils/passwordStrength";
+import { faUser, faEnvelope, faLock, faEyeSlash, faEye } from "@fortawesome/free-solid-svg-icons";
 
 export default function RegisterPage() {
   const router = useRouter();
-  const [error, setError] = useState("");
-  const [success, setSuccess] = useState("");
-  const [formData, setFormData] = useState({
-    name: "",
-    email: "",
-    password: "",
-  });
+  const [formData, setFormData] = useState({ name: "", email: "", password: "" });
+  const [showPassword, setShowPassword] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
+  const strength = useMemo(() => getPasswordStrength(formData.password), [formData.password]);
 
   const handleChange = (e) => {
-    setFormData({
-      ...formData,
-      [e.target.name]: e.target.value,
-    });
+    setFormData({ ...formData, [e.target.name]: e.target.value });
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    setError("");
-    setSuccess("");
-
+    if (isLoading) return;
+    setIsLoading(true);
     try {
       const res = await api.post("/auth/register", formData);
-
       if (res.data.success) {
-        setSuccess("Cuenta creada correctamente. Redirigiendo...");
-        setTimeout(() => {
-          router.push("/login");
-        }, 1500);
+        Notification.success("Cuenta creada correctamente. Redirigendo...");
+        setTimeout(() => router.push("/login"), 2000);
       }
     } catch (err) {
-      setError(
-        err.response?.data?.message || "Error al registrar el usuario"
-      );
+      logger.error("Error al registrar el usuario:", err);
+      Notification.error(err.response?.data?.message || "Error al registrar el usuario");
+      setIsLoading(false);
     }
   };
 
   return (
     <Page>
       <Card>
-        <Header>
-          <Title>Crear cuenta</Title>
-          <Subtitle>
-            ¿Primera vez aquí? Regístrate para gestionar tus citas de forma sencilla.
-          </Subtitle>
-        </Header>
+        <CardBody>
+          <Header>
+            <Title>Crear cuenta</Title>
+            <Subtitle>¿Primera vez aquí? Regístrate para gestionar tus citas de forma sencilla.</Subtitle>
+          </Header>
 
-        <Form onSubmit={handleSubmit}>
-          <FieldGroup>
-            <Label htmlFor="name">Nombre</Label>
-            <Field>
-              <IconWrapper>
-                <FontAwesomeIcon icon={faUser} />
-              </IconWrapper>
-              <Input
-                id="name"
-                type="text"
-                name="name"
-                placeholder="Tu nombre completo"
-                value={formData.name}
-                onChange={handleChange}
-                required
-              />
-            </Field>
-          </FieldGroup>
+          <Form onSubmit={handleSubmit}>
+            <FieldGroup>
+              <Label htmlFor="name">Nombre</Label>
+              <Field>
+                <IconWrapper><FontAwesomeIcon icon={faUser} /></IconWrapper>
+                <Input
+                  id="name"
+                  type="text"
+                  name="name"
+                  placeholder="Tu nombre completo"
+                  autoComplete="name"
+                  value={formData.name}
+                  onChange={handleChange}
+                  disabled={isLoading}
+                  required
+                />
+              </Field>
+            </FieldGroup>
 
-          <FieldGroup>
-            <Label htmlFor="email">Correo electrónico</Label>
-            <Field>
-              <IconWrapper>
-                <FontAwesomeIcon icon={faEnvelope} />
-              </IconWrapper>
-              <Input
-                id="email"
-                type="email"
-                name="email"
-                placeholder="ejemplo@correo.com"
-                value={formData.email}
-                onChange={handleChange}
-                required
-              />
-            </Field>
-          </FieldGroup>
+            <FieldGroup>
+              <Label htmlFor="email">Correo electrónico</Label>
+              <Field>
+                <IconWrapper><FontAwesomeIcon icon={faEnvelope} /></IconWrapper>
+                <Input
+                  id="email"
+                  type="email"
+                  name="email"
+                  placeholder="ejemplo@correo.com"
+                  autoComplete="email"
+                  value={formData.email}
+                  onChange={handleChange}
+                  disabled={isLoading}
+                  required
+                />
+              </Field>
+            </FieldGroup>
 
-          <FieldGroup>
-            <Label htmlFor="password">Contraseña</Label>
-            <Field>
-              <IconWrapper>
-                <FontAwesomeIcon icon={faLock} />
-              </IconWrapper>
-              <Input
-                id="password"
-                type="password"
-                name="password"
-                placeholder="Mínimo 8 caracteres"
-                value={formData.password}
-                onChange={handleChange}
-                required
-              />
-            </Field>
-          </FieldGroup>
+            <FieldGroup>
+              <Label htmlFor="password">Contraseña</Label>
+              <Field>
+                <IconWrapper><FontAwesomeIcon icon={faLock} /></IconWrapper>
+                <Input
+                  id="password"
+                  type={showPassword ? "text" : "password"}
+                  name="password"
+                  placeholder="Ingresa una contraseña segura"
+                  autoComplete="new-password"
+                  value={formData.password}
+                  onChange={handleChange}
+                  disabled={isLoading}
+                  required
+                />
+                <TogglePassword
+                  type="button"
+                  onClick={() => setShowPassword((prev) => !prev)}
+                  title={showPassword ? "Ocultar contraseña" : "Mostrar contraseña"}
+                  disabled={isLoading}
+                >
+                  <FontAwesomeIcon icon={showPassword ? faEye : faEyeSlash} />
+                </TogglePassword>
+              </Field>
 
-          <Button type="submit">Registrarse</Button>
+              {formData.password.length > 0 && (
+                <>
+                  <StrengthBar>
+                    {[1, 2, 3, 4].map((i) => (
+                      <StrengthSegment
+                        key={i}
+                        active={i <= strength}
+                        color={STRENGTH_COLORS[strength]}
+                      />
+                    ))}
+                  </StrengthBar>
+                  <StrengthLabel color={STRENGTH_COLORS[strength]}>
+                    {STRENGTH_LABELS[strength]}
+                  </StrengthLabel>
+                </>
+              )}
+            </FieldGroup>
 
-          {error && <Message type="error">{error}</Message>}
-          {success && <Message type="success">{success}</Message>}
-        </Form>
+            <Button type="submit" disabled={isLoading}>
+              {isLoading ? "Procesando..." : "Registrarse"}
+            </Button>
+          </Form>
 
-        <Footer>
-          ¿Ya tienes cuenta?{" "}
-          <LinkText onClick={() => router.push("/login")}>
-            Inicia sesión
-          </LinkText>
-        </Footer>
+          <Footer>
+            ¿Ya tienes cuenta?{" "}
+            <LinkText onClick={() => !isLoading && router.push("/login")}>Inicia sesión</LinkText>
+          </Footer>
+        </CardBody>
       </Card>
     </Page>
   );

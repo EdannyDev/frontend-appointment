@@ -5,34 +5,50 @@ export const Page = styled.div`
   display: flex;
   align-items: center;
   justify-content: center;
+  padding: 24px;
+
+  @media (max-width: 768px) {
+    padding: 16px;
+  }
 `;
 
 export const Card = styled.div`
   width: 100%;
   max-width: 420px;
-  background: #ffffff;
-  padding: 40px 36px;
-  border-radius: 16px;
-  box-shadow:
-    0 30px 60px rgba(0, 0, 0, 0.08),
-    0 10px 20px rgba(0, 0, 0, 0.05);
+  background: var(--surface);
+  border: 0.5px solid var(--border);
+  border-top: 3px solid var(--accent);
+  border-radius: var(--radius-lg);
+`;
+
+export const CardBody = styled.div`
+  padding: 36px 34px;
+
+  @media (max-width: 768px) {
+    padding: 28px 22px;
+  }
 `;
 
 export const Header = styled.div`
-  text-align: center;
-  margin-bottom: 32px;
+  margin-bottom: 20px;
 `;
 
 export const Title = styled.h1`
-  font-size: 25px;
-  font-weight: 600;
-  color: #171717;
+  font-size: 30px;
+  font-weight: 700;
+  color: var(--text-1);
+  text-align: center;
+
+  @media (max-width: 768px) {
+    font-size: 24px;
+  }
 `;
 
 export const Subtitle = styled.p`
   margin-top: 8px;
   font-size: 15px;
-  color: #525252;
+  color: var(--text-2);
+  text-align: center;
 `;
 
 export const Form = styled.form`
@@ -44,87 +60,142 @@ export const Form = styled.form`
 export const FieldGroup = styled.div`
   display: flex;
   flex-direction: column;
-  gap: 5px;
+  gap: 7px;
 `;
 
 export const Label = styled.label`
-  font-size: 15px;
-  font-weight: 600;
-  color: #404040;
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--text-2);
 `;
 
 export const Field = styled.div`
   display: flex;
   align-items: center;
-  background: #fafafa;
-  border: 1px solid #e5e5e5;
-  border-radius: 12px;
+  gap: 10px;
+  background: var(--card);
+  border: 1.5px solid var(--border);
+  border-radius: var(--radius-sm);
   padding: 0 14px;
-  transition: border-color 0.3s;
+  transition: border-color var(--ease);
 
   &:focus-within {
-    border-color: #262626;
+    border-color: var(--accent);
   }
 `;
 
 export const IconWrapper = styled.div`
-  color: #737373;
-  font-size: 14px;
+  color: var(--text-3);
+  font-size: 16px;
+  flex-shrink: 0;
 `;
 
 export const Input = styled.input`
   flex: 1;
+  min-width: 0;
   border: none;
   background: transparent;
-  padding: 14px 6px;
-  font-size: 14px;
-  color: #171717;
+  padding: 13px 0;
+  font-size: 15.5px;
+  font-family: inherit;
+  color: var(--text-1);
 
   &::placeholder {
-    color: #a3a3a3;
+    color: var(--text-3);
   }
 
   &:focus {
     outline: none;
   }
+
+  &:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+  }
+`;
+
+export const TogglePassword = styled.button`
+  all: unset;
+  cursor: pointer;
+  color: var(--text-3);
+  font-size: 16px;
+  display: flex;
+  align-items: center;
+  transition: color var(--ease);
+  flex-shrink: 0;
+
+  &:hover {
+    color: var(--text-1);
+  }
+
+  &:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+  }
 `;
 
 export const Button = styled.button`
-  margin-top: 12px;
-  padding: 14px;
-  border-radius: 12px;
+  margin-top: 4px;
+  padding: 15px;
+  border-radius: var(--radius-sm);
   border: none;
-  background: #171717;
-  color: #ffffff;
+  background: var(--accent);
+  color: var(--bg);
   font-size: 15px;
   font-weight: 600;
   cursor: pointer;
+  font-family: inherit;
+  transition: opacity var(--ease);
 
-  &:hover {
-    background: #262626;
+  &:hover:not(:disabled) {
+    opacity: 0.88;
   }
-`;
 
-export const Message = styled.p`
-  font-size: 15px;
-  text-align: center;
-  color: ${(props) =>
-    props.type === "error" ? "#b91c1c" : "#15803d"};
+  &:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+  }
+
+  &:focus-visible {
+    outline: none;
+    box-shadow: 0 0 0 3px rgba(200, 241, 53, 0.28);
+  }
 `;
 
 export const Footer = styled.p`
-  margin-top: 25px;
+  margin-top: 24px;
   text-align: center;
   font-size: 14px;
-  color: #525252;
+  color: var(--text-2);
 `;
 
 export const LinkText = styled.span`
-  color: #171717;
+  color: var(--accent);
   font-weight: 600;
   cursor: pointer;
 
   &:hover {
-    text-decoration: underline;
+    opacity: 0.8;
   }
+`;
+
+export const StrengthBar = styled.div`
+  display: flex;
+  gap: 4px;
+  margin-top: 8px;
+`;
+
+export const StrengthSegment = styled.span`
+  flex: 1;
+  height: 3px;
+  border-radius: 999px;
+  background: ${({ active, color }) => (active ? color : "var(--border)")};
+  transition: background 0.3s ease;
+`;
+
+export const StrengthLabel = styled.p`
+  font-size: 0.75rem;
+  font-weight: 500;
+  color: ${({ color }) => color || "var(--text-3)"};
+  margin: 4px 0 0;
 `;

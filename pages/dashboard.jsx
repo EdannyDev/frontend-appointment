@@ -1,137 +1,100 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useState } from "react";
+import { logger } from "@/utils/logger";
 import api from "@/lib/axiosInstance";
 import {
-  Grid,
+  Page,
+  Header,
+  Welcome,
+  Subtitle,
+  DateText,
+  Cards,
   Card,
   CardTitle,
   CardValue,
-  NextAppointment,
-  Label,
-  Empty,
-  Title
+  EmptyState,
+  SectionTitle,
+  AppointmentItem,
+  AppointmentLeft,
+  AppointmentName,
+  AppointmentService,
+  AppointmentTime,
+  AppointmentsList
 } from "@/styles/dashboard.styles";
-import Layout from "@/components/layout";
-
-const buildDateTime = (date, time) => {
-  const [y, m, d] = date.split("-").map(Number);
-  const [h, min] = time.split(":").map(Number);
-  return new Date(y, m - 1, d, h, min, 0);
-};
-
-const formatDate = (date) =>
-  new Date(date).toLocaleDateString("es-MX", {
-    weekday: "long",
-    day: "2-digit",
-    month: "long",
-    year: "numeric",
-  });
-
-const formatTime = (time) => {
-  const [h, m] = time.split(":").map(Number);
-  const d = new Date();
-  d.setHours(h, m, 0, 0);
-  return d.toLocaleTimeString("es-MX", {
-    hour: "numeric",
-    minute: "2-digit",
-    hour12: true,
-  });
-};
+import { useAuth } from "@/context/authContext";
+import { Notification } from "@/components/notification";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { formatAppointmentDateTime, formatTodayHeader } from "@/utils/time";
+import { faCalendarDay, faClock, faCircleXmark } from "@fortawesome/free-solid-svg-icons";
 
 export default function AdminDashboard() {
-  const [appointments, setAppointments] = useState([]);
-  const [loading, setLoading] = useState(true);
+  const { user } = useAuth();
+  const [stats, setStats] = useState(null);
+  const [nextAppointments, setNextAppointments] = useState([]);
 
   useEffect(() => {
-    const fetchAppointments = async () => {
+    if (!user || user.role !== "ADMIN") return;
+
+    const load = async () => {
       try {
-        const res = await api.get("/appointments");
-        setAppointments(res.data.data);
-      } catch (e) {
-        console.error(e);
-      } finally {
-        setLoading(false);
+        const { data } = await api.get("/appointments/summary");
+        setStats({
+          today: data.data.today,
+          pending: data.data.pending,
+          cancelled: data.data.cancelled,
+        });
+        setNextAppointments(data.data.upcoming);
+      } catch (err) {
+        logger.error("Error al cargar el dashboard:", err);
+        Notification.error(err.response?.data?.message || "No se pudo cargar la información del panel");
       }
     };
 
-    fetchAppointments();
-  }, []);
-
-  const today = new Date().toISOString().split("T")[0];
-
-  const stats = useMemo(
-    () => ({
-      today: appointments.filter((a) => a.date === today).length,
-      pending: appointments.filter((a) => a.status === "PENDING").length,
-      confirmed: appointments.filter((a) => a.status === "CONFIRMED").length,
-      cancelled: appointments.filter((a) => a.status === "CANCELLED").length,
-    }),
-    [appointments, today]
-  );
-
-  const nextAppointment = useMemo(() => {
-    return appointments
-      .filter((a) => a.status !== "CANCELLED")
-      .map((a) => ({
-        ...a,
-        dateTime: buildDateTime(a.date, a.start_time),
-      }))
-      .filter((a) => a.dateTime > new Date())
-      .sort((a, b) => a.dateTime - b.dateTime)[0];
-  }, [appointments]);
-
-  if (loading) return null;
+    load();
+  }, [user]);
 
   return (
-    <Layout>
-      <Title>Dashboard</Title>
+    <Page>
+      <Header>
+        <Welcome>¡Hola de nuevo, {user?.name}!</Welcome>
+        <Subtitle>Administra tus citas y mantén el control del negocio de forma sencilla</Subtitle>
+        <DateText>{formatTodayHeader()}</DateText>
+      </Header>
 
-      <Grid>
-        <Card>
-          <CardTitle>Citas hoy</CardTitle>
-          <CardValue>{stats.today}</CardValue>
-        </Card>
+      {stats && (
+        <Cards>
+          <Card variant="today">
+            <CardTitle><FontAwesomeIcon icon={faCalendarDay} /> Citas hoy</CardTitle>
+            <CardValue>{stats.today}</CardValue>
+          </Card>
+          <Card variant="pending">
+            <CardTitle><FontAwesomeIcon icon={faClock} /> Pendientes</CardTitle>
+            <CardValue>{stats.pending}</CardValue>
+          </Card>
+          <Card variant="cancelled">
+            <CardTitle><FontAwesomeIcon icon={faCircleXmark} /> Canceladas</CardTitle>
+            <CardValue>{stats.cancelled}</CardValue>
+          </Card>
+        </Cards>
+      )}
 
-        <Card>
-          <CardTitle>Pendientes</CardTitle>
-          <CardValue>{stats.pending}</CardValue>
-        </Card>
-
-        <Card>
-          <CardTitle>Confirmadas</CardTitle>
-          <CardValue>{stats.confirmed}</CardValue>
-        </Card>
-
-        <Card>
-          <CardTitle>Canceladas</CardTitle>
-          <CardValue>{stats.cancelled}</CardValue>
-        </Card>
-      </Grid>
-
-      <NextAppointment>
-        <CardTitle>Próxima cita</CardTitle>
-
-        {!nextAppointment && <Empty>No hay citas próximas</Empty>}
-
-        {nextAppointment && (
-          <>
-            <div>
-              <Label>Cliente:</Label> {nextAppointment.client_name}
-            </div>
-            <div>
-              <Label>Servicio:</Label> {nextAppointment.service_name}
-            </div>
-            <div>
-              <Label>Fecha:</Label> {formatDate(nextAppointment.date)}
-            </div>
-            <div>
-              <Label>Hora:</Label> {formatTime(nextAppointment.start_time)}
-            </div>
-            <div>
-              <Label>Estado:</Label> {nextAppointment.status}
-            </div>
-          </>
+      <SectionTitle>Próximas citas</SectionTitle>
+      <AppointmentsList>
+        {nextAppointments.length === 0 ? (
+          <EmptyState>No hay citas próximas</EmptyState>
+        ) : (
+          nextAppointments.map((a) => (
+            <AppointmentItem key={a.id}>
+              <AppointmentLeft>
+                <AppointmentName>{a.client_name}</AppointmentName>
+                <AppointmentService>{a.service_name}</AppointmentService>
+              </AppointmentLeft>
+              <AppointmentTime>
+                {formatAppointmentDateTime(a.date, a.start_time, a.end_time)}
+              </AppointmentTime>
+            </AppointmentItem>
+          ))
         )}
-      </NextAppointment>
-    </Layout>
+      </AppointmentsList>
+    </Page>
   );
 }

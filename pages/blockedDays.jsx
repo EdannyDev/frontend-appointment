@@ -1,9 +1,10 @@
-import { useEffect, useState } from "react";
-import Layout from "@/components/layout";
+import { useFetch } from "@/hooks/useFetch";
 import api from "@/lib/axiosInstance";
+import { useState } from "react";
 import {
   Container,
   Title,
+  PageSubtitle,
   Form,
   Input,
   Button,
@@ -11,111 +12,226 @@ import {
   Th,
   Td,
   Empty,
-  DeleteButton
+  DeleteButton,
+  StyledTbody
 } from "@/styles/blockedDays.styles";
+import Modal from "@/components/modal";
+import { formatDateShort } from "@/utils/time";
+import Pagination from "@/components/pagination";
+import { Notification } from "@/components/notification";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faTrash, faCalendar, faCalendarAlt, faFileLines } from "@fortawesome/free-solid-svg-icons";
+import { faTrash, faCalendar, faCalendarAlt, faFileLines, faCalendarDay } from "@fortawesome/free-solid-svg-icons";
 
-const formatDate = (date) =>
-  new Date(date).toLocaleDateString("es-MX", {
-    day: "2-digit",
-    month: "2-digit",
-    year: "numeric",
-  });
+const PAGE_SIZE = 10;
+
+const groupRanges = (data) => {
+  const sorted = [...data].sort((a, b) => new Date(a.date) - new Date(b.date));
+  const result = [];
+  let current = null;
+
+  for (const d of sorted) {
+    if (!current) {
+      current = { start: d.date, end: d.date, reason: d.reason, ids: [d.id] };
+      continue;
+    }
+    const prevDate = new Date(current.end);
+    prevDate.setDate(prevDate.getDate() + 1);
+    const currDate = new Date(d.date);
+    const sameReason = (current.reason || "") === (d.reason || "");
+    if (currDate.getTime() === prevDate.getTime() && sameReason) {
+      current.end = d.date;
+      current.ids.push(d.id);
+    } else {
+      result.push(current);
+      current = { start: d.date, end: d.date, reason: d.reason, ids: [d.id] };
+    }
+  }
+  if (current) result.push(current);
+  return result;
+};
 
 export default function BlockedDaysPage() {
-  const [days, setDays] = useState([]);
-  const [loading, setLoading] = useState(true);
+  const { data: rawDays, refetch: fetchBlockedDays } = useFetch(
+    () => api.get("/blocked-days").then((r) => r.data.data || []),
+    { errorMessage: "Error al cargar los días bloqueados", initialData: [] }
+  );
+  const days = groupRanges(rawDays || []);
+
+  const [currentPage, setCurrentPage] = useState(1);
   const [date, setDate] = useState("");
   const [reason, setReason] = useState("");
-
-  const fetchBlockedDays = async () => {
-    try {
-      const res = await api.get("/blocked-days");
-      setDays(res.data.data);
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  useEffect(() => {
-    fetchBlockedDays();
-  }, []);
+  const [startDate, setStartDate] = useState("");
+  const [endDate, setEndDate] = useState("");
+  const [rangeReason, setRangeReason] = useState("");
+  const [isBlockingDay, setIsBlockingDay] = useState(false);
+  const [isBlockingRange, setIsBlockingRange] = useState(false);
+  const [isConfirming, setIsConfirming] = useState(false);
+  const [modalVisible, setModalVisible] = useState(false);
+  const [modalMessage, setModalMessage] = useState("");
+  const [modalAction, setModalAction] = useState(null);
 
   const createBlockedDay = async (e) => {
     e.preventDefault();
-    if (!date) return;
-
-    await api.post("/blocked-days", { date, reason });
-    setDate("");
-    setReason("");
-    fetchBlockedDays();
+    if (!date || isBlockingDay) return;
+    setIsBlockingDay(true);
+    try {
+      await api.post("/blocked-days", { date, reason });
+      Notification.success("Día bloqueado correctamente");
+      setDate("");
+      setReason("");
+      fetchBlockedDays();
+    } catch (err) {
+      Notification.error(err.response?.data?.message || "Error al bloquear el día");
+    } finally {
+      setIsBlockingDay(false);
+    }
   };
 
-  const deleteBlockedDay = async (id) => {
-    await api.delete(`/blocked-days/${id}`);
-    fetchBlockedDays();
+  const createBlockedRange = async (e) => {
+    e.preventDefault();
+    if (!startDate || !endDate || isBlockingRange) return;
+    setIsBlockingRange(true);
+    try {
+      await api.post("/blocked-days/range", {
+        start_date: startDate,
+        end_date: endDate,
+        reason: rangeReason,
+      });
+      Notification.success("Rango bloqueado correctamente");
+      setStartDate("");
+      setEndDate("");
+      setRangeReason("");
+      fetchBlockedDays();
+    } catch (err) {
+      Notification.error(err.response?.data?.message || "Error al bloquear el rango de días");
+    } finally {
+      setIsBlockingRange(false);
+    }
   };
+
+  const confirmDeleteBlockedDay = (range) => {
+    const isRange = range.start !== range.end;
+    setModalMessage(
+      isRange
+        ? "¿Seguro que deseas eliminar este rango de días bloqueados?"
+        : "¿Seguro que deseas eliminar este día bloqueado?"
+    );
+    setModalAction(() => async () => {
+      if (isConfirming) return;
+      setIsConfirming(true);
+      try {
+        if (isRange) {
+          const normalize = (d) => new Date(d).toISOString().slice(0, 10);
+          await api.delete(
+            `/blocked-days/range?start_date=${normalize(range.start)}&end_date=${normalize(range.end)}`
+          );
+          Notification.success("Rango eliminado correctamente");
+        } else {
+          await api.delete(`/blocked-days/${range.ids[0]}`);
+          Notification.success("Día bloqueado eliminado");
+        }
+        fetchBlockedDays();
+      } catch (err) {
+        Notification.error(err.response?.data?.message || "Error al eliminar el día bloqueado");
+      } finally {
+        setModalVisible(false);
+        setIsConfirming(false);
+      }
+    });
+    setModalVisible(true);
+  };
+
+  const totalPages = Math.ceil(days.length / PAGE_SIZE);
+  const paginatedDays = days.slice((currentPage - 1) * PAGE_SIZE, currentPage * PAGE_SIZE);
+
+  if (currentPage > totalPages && totalPages > 0) {
+    setCurrentPage(totalPages);
+  }
 
   return (
-    <Layout>
-      <Container>
-        <Title>Días bloqueados</Title>
+    <Container>
+      <Title>Días bloqueados</Title>
+      <PageSubtitle>Bloquea fechas individuales o rangos para que no estén disponibles en las reservas.</PageSubtitle>
 
-        <Form onSubmit={createBlockedDay}>
-          <Input
-            type="date"
-            value={date}
-            onChange={(e) => setDate(e.target.value)}
-            required
-          />
-          <Input
-            type="text"
-            placeholder="Motivo (opcional)"
-            value={reason}
-            onChange={(e) => setReason(e.target.value)}
-          />
-          <Button type="submit">
-            <FontAwesomeIcon icon={faCalendar} />
-            Bloquear día
-          </Button>
-        </Form>
+      <Form onSubmit={createBlockedDay}>
+        <Input type="date" value={date} onChange={(e) => setDate(e.target.value)} required />
+        <Input
+          type="text"
+          placeholder="Motivo (opcional)"
+          value={reason}
+          onChange={(e) => setReason(e.target.value)}
+        />
+        <Button type="submit" disabled={isBlockingDay}>
+          <FontAwesomeIcon icon={faCalendarDay} />
+          {isBlockingDay ? "Procesando..." : "Bloquear día"}
+        </Button>
+      </Form>
 
-        {loading && <p>Cargando días bloqueados...</p>}
+      <Form onSubmit={createBlockedRange}>
+        <Input type="date" value={startDate} onChange={(e) => setStartDate(e.target.value)} required />
+        <Input type="date" value={endDate} onChange={(e) => setEndDate(e.target.value)} required />
+        <Input
+          type="text"
+          placeholder="Motivo (opcional)"
+          value={rangeReason}
+          onChange={(e) => setRangeReason(e.target.value)}
+        />
+        <Button type="submit" disabled={isBlockingRange}>
+          <FontAwesomeIcon icon={faCalendarAlt} />
+          {isBlockingRange ? "Procesando..." : "Bloquear rango"}
+        </Button>
+      </Form>
 
-        {!loading && days.length === 0 && (
-          <Empty>No hay días bloqueados</Empty>
-        )}
-
-        {!loading && days.length > 0 && (
+      {days.length === 0 ? (
+        <Empty>No hay días bloqueados</Empty>
+      ) : (
+        <>
           <Table>
             <thead>
               <tr>
-                <Th>
-                  <FontAwesomeIcon icon={faCalendarAlt} />Fecha
-                </Th>
-                <Th>
-                  <FontAwesomeIcon icon={faFileLines} />Motivo
-                </Th>
+                <Th><FontAwesomeIcon icon={faCalendar} /> Fecha</Th>
+                <Th><FontAwesomeIcon icon={faFileLines} /> Motivo</Th>
                 <Th>Acción</Th>
               </tr>
             </thead>
-            <tbody>
-              {days.map((d) => (
-                <tr key={d.id}>
-                  <Td>{formatDate(d.date)}</Td>
-                  <Td>{d.reason || "—"}</Td>
-                  <Td>
-                    <DeleteButton onClick={() => deleteBlockedDay(d.id)}>
+            <StyledTbody>
+              {paginatedDays.map((d, index) => (
+                <tr key={index}>
+                  <Td data-label="Fecha">
+                    {d.start === d.end
+                      ? formatDateShort(d.start)
+                      : `${formatDateShort(d.start)} – ${formatDateShort(d.end)}`}
+                  </Td>
+                  <Td data-label="Motivo">{d.reason || "—"}</Td>
+                  <Td data-label="Acción">
+                    <DeleteButton
+                      onClick={() => confirmDeleteBlockedDay(d)}
+                      disabled={isConfirming}
+                    >
                       <FontAwesomeIcon icon={faTrash} />
                     </DeleteButton>
                   </Td>
                 </tr>
               ))}
-            </tbody>
+            </StyledTbody>
           </Table>
-        )}
-      </Container>
-    </Layout>
+
+          {totalPages > 1 && (
+            <Pagination
+              totalPages={totalPages}
+              currentPage={currentPage}
+              onPageChange={setCurrentPage}
+            />
+          )}
+        </>
+      )}
+
+      <Modal
+        visible={modalVisible}
+        message={modalMessage}
+        onConfirm={modalAction}
+        onCancel={() => { setModalVisible(false); setIsConfirming(false); }}
+      />
+    </Container>
   );
 }
