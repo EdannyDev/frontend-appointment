@@ -1,3 +1,4 @@
+import { withRetry } from "@/lib/withRetry";
 import { useRouter } from "next/router";
 import { logger } from "@/utils/logger";
 import api from "@/lib/axiosInstance";
@@ -31,6 +32,7 @@ export default function LoginPage() {
   const [formData, setFormData] = useState({ email: "", password: "" });
   const [showPassword, setShowPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
+  const [isSlowLoading, setIsSlowLoading] = useState(false);
   const [reactivateModal, setReactivateModal] = useState(false);
 
   const handleChange = (e) => {
@@ -41,10 +43,13 @@ export default function LoginPage() {
     e.preventDefault();
     if (isLoading) return;
     setIsLoading(true);
+
+    const slowTimer = setTimeout(() => setIsSlowLoading(true), 4000);
+
     try {
-      const res = await api.post("/auth/login", formData);
+      const res = await withRetry(() => api.post("/auth/login", formData));
       if (res.data.success) {
-        const me = await api.get("/auth/me");
+        const me = await withRetry(() => api.get("/auth/me"));
         const role = me.data.data.role;
         Notification.success("Inicio de sesión exitoso");
         router.push(role === "ADMIN" ? "/dashboard" : "/home");
@@ -54,18 +59,23 @@ export default function LoginPage() {
       if (err.response?.data?.code === "ACCOUNT_DEACTIVATED") {
         setReactivateModal(true);
         setIsLoading(false);
+        clearTimeout(slowTimer);
+        setIsSlowLoading(false);
         return;
       }
       Notification.error(err.response?.data?.message || "Error al iniciar sesión");
       setIsLoading(false);
+    } finally {
+      clearTimeout(slowTimer);
+      setIsSlowLoading(false);
     }
   };
 
   const handleReactivate = async () => {
     try {
-      const res = await api.post("/auth/reactivate-account", formData);
+      const res = await withRetry(() => api.post("/auth/reactivate-account", formData));
       if (res.data.success) {
-        const me = await api.get("/auth/me");
+        const me = await withRetry(() => api.get("/auth/me"));
         const role = me.data.data.role;
         Notification.success("¡Cuenta reactivada! Bienvenido de nuevo");
         router.push(role === "ADMIN" ? "/dashboard" : "/home");
@@ -141,7 +151,9 @@ export default function LoginPage() {
             </ForgotLink>
 
             <Button type="submit" disabled={isLoading}>
-              {isLoading ? "Procesando..." : "Ingresar"}
+              {isLoading
+                ? (isSlowLoading ? "Iniciando el servidor, esto puede tardar unos segundos..." : "Procesando...")
+                : "Ingresar"}
             </Button>
           </Form>
 

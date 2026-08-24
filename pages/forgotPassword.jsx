@@ -1,3 +1,4 @@
+import { withRetry } from "@/lib/withRetry";
 import { useRouter } from "next/router";
 import { logger } from "@/utils/logger";
 import api from "@/lib/axiosInstance";
@@ -28,19 +29,25 @@ export default function ForgotPasswordPage() {
   const router = useRouter();
   const [email, setEmail] = useState("");
   const [isLoading, setIsLoading] = useState(false);
+  const [isSlowLoading, setIsSlowLoading] = useState(false);
   const [sent, setSent] = useState(false);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     if (isLoading) return;
     setIsLoading(true);
+
+    const slowTimer = setTimeout(() => setIsSlowLoading(true), 4000);
+
     try {
-      await api.post("/auth/forgot-password", { email });
+      await withRetry(() => api.post("/auth/forgot-password", { email }));
       setSent(true);
     } catch (err) {
       logger.error("Error al solicitar restablecimiento:", err);
       Notification.error(err.response?.data?.message || "Error al enviar el correo");
     } finally {
+      clearTimeout(slowTimer);
+      setIsSlowLoading(false);
       setIsLoading(false);
     }
   };
@@ -89,7 +96,9 @@ export default function ForgotPasswordPage() {
               </FieldGroup>
 
               <Button type="submit" disabled={isLoading}>
-                {isLoading ? "Procesando..." : "Enviar enlace"}
+                {isLoading
+                  ? (isSlowLoading ? "Iniciando el servidor, esto puede tardar unos segundos..." : "Procesando...")
+                  : "Enviar enlace"}
               </Button>
             </Form>
           )}

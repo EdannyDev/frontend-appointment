@@ -1,3 +1,4 @@
+import { withRetry } from "@/lib/withRetry";
 import { useState, useMemo } from "react";
 import { useRouter } from "next/router";
 import { logger } from "@/utils/logger";
@@ -33,6 +34,7 @@ export default function RegisterPage() {
   const [formData, setFormData] = useState({ name: "", email: "", password: "" });
   const [showPassword, setShowPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
+  const [isSlowLoading, setIsSlowLoading] = useState(false);
   const strength = useMemo(() => getPasswordStrength(formData.password), [formData.password]);
 
   const handleChange = (e) => {
@@ -43,8 +45,11 @@ export default function RegisterPage() {
     e.preventDefault();
     if (isLoading) return;
     setIsLoading(true);
+
+    const slowTimer = setTimeout(() => setIsSlowLoading(true), 4000);
+
     try {
-      const res = await api.post("/auth/register", formData);
+      const res = await withRetry(() => api.post("/auth/register", formData));
       if (res.data.success) {
         Notification.success("Cuenta creada correctamente. Redirigendo...");
         setTimeout(() => router.push("/login"), 2000);
@@ -53,6 +58,9 @@ export default function RegisterPage() {
       logger.error("Error al registrar el usuario:", err);
       Notification.error(err.response?.data?.message || "Error al registrar el usuario");
       setIsLoading(false);
+    } finally {
+      clearTimeout(slowTimer);
+      setIsSlowLoading(false);
     }
   };
 
@@ -146,7 +154,9 @@ export default function RegisterPage() {
             </FieldGroup>
 
             <Button type="submit" disabled={isLoading}>
-              {isLoading ? "Procesando..." : "Registrarse"}
+              {isLoading
+                ? (isSlowLoading ? "Iniciando el servidor, esto puede tardar unos segundos..." : "Procesando...")
+                : "Registrarse"}
             </Button>
           </Form>
 
