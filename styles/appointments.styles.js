@@ -291,7 +291,6 @@ export const StyledTbody = styled.tbody`
       background: var(--surface) !important;
       border: 0.5px solid var(--border);
       border-radius: 12px;
-      overflow: hidden;
     }
 
     tr:last-of-type td:first-of-type,
