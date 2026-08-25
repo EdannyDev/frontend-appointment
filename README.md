@@ -34,6 +34,7 @@ It integrates a dynamic calendar system and enforces role-based UI control, comm
 - Two distinct layouts sharing the same design system: a collapsible sidebar for the **Admin panel** and a top navbar for the **Client panel**
 - Reusable, composable components (`modal`, `modalReschedule`, `notification`, `pagination`, `loader`)
 - Centralized Axios instance (`lib/axiosInstance.js`) for API communication
+- Request-level resilience via `lib/withRetry.js`, which retries transient failures (e.g. backend cold starts, unstable connections) with a fixed delay, skipping retries on 401/403 to avoid masking real auth errors
 - Route config centralized in `config/appRoutes.js`, auth state in `context/authContext.js`
 - FullCalendar integration with dynamic view switching
 - Role-based route protection with a global 401 interceptor
@@ -44,6 +45,7 @@ The application emphasizes clarity, responsiveness and scheduling usability.
 ## 🔐 Authentication Handling
 
 - Secure session handling via HttpOnly cookies (managed by backend)
+- Cookies configured as `SameSite=None; Secure` to support cross-site auth, since the frontend (Vercel) and backend (Render) are served from different domains in production
 - Role-based rendering (Admin / Client)
 - Protected routes with automatic redirection for unauthorized users
 - Global 401 interceptor for expired/invalid sessions
@@ -86,7 +88,7 @@ cp .env.example .env.local
 
 | Variable               | Description                              | Example                     |
 |-------------------------|-------------------------------------------|------------------------------|
-| `NEXT_PUBLIC_API_URL`  | Base URL of the backend REST API          | `http://localhost:5000/api` |
+| `NEXT_PUBLIC_API_URL`  | Base URL of the backend REST API          | `https://backend-appointment-0eqz.onrender.com/api/v2` |
 
 ### Running the App
 
@@ -111,7 +113,9 @@ The interface is fully responsive from a 768px breakpoint down to mobile, coveri
 
 ## 🌐 Live Demo
 
-Deployment in progress (Vercel) — link coming soon.
+Deployed on [Vercel](https://vercel.com), consuming the backend API deployed on [Render](https://render.com):
+
+**[gestor-citas-edannydev.vercel.app](https://gestor-citas-edannydev.vercel.app/login)**
 
 ---
 
