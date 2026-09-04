@@ -1,16 +1,17 @@
 import styled from "@emotion/styled";
+import { STATUS_THEME } from "@/utils/statusTheme";
 
 const STAT_THEMES = {
-  active: { bg: "#573D13", border: "rgba(201, 138, 26, 0.5)", text: "#FFD073" },
-  completed: { bg: "#1B3E73", border: "rgba(58, 123, 213, 0.5)", text: "#8FC0FF" },
-  cancelled: { bg: "#5C232A", border: "rgba(217, 79, 79, 0.5)", text: "#FF9D9D" },
+  active: { bg: STATUS_THEME.PENDING.bg, border: STATUS_THEME.PENDING.border, text: STATUS_THEME.PENDING.text },
+  completed: { bg: STATUS_THEME.COMPLETED.bg, border: STATUS_THEME.COMPLETED.border, text: STATUS_THEME.COMPLETED.text },
+  cancelled: { bg: STATUS_THEME.CANCELLED.bg, border: STATUS_THEME.CANCELLED.border, text: STATUS_THEME.CANCELLED.text },
 };
 
 const STATUS_COLORS = {
-  PENDING: "#C98A1A",
-  CONFIRMED: "#1D9E75",
-  COMPLETED: "#3A7BD5",
-  CANCELLED: "#D94F4F",
+  PENDING: STATUS_THEME.PENDING.solid,
+  CONFIRMED: STATUS_THEME.CONFIRMED.solid,
+  COMPLETED: STATUS_THEME.COMPLETED.solid,
+  CANCELLED: STATUS_THEME.CANCELLED.solid,
 };
 
 export const Container = styled.div`

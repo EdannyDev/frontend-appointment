@@ -41,11 +41,11 @@ export default function Pagination({ totalPages, currentPage, onPageChange }) {
   const paginationRange = getPaginationRange(totalPages, currentPage);
 
   return (
-    <PaginationWrapper role="navigation" aria-label="Pagination">
+    <PaginationWrapper role="navigation" aria-label="Paginación">
       <IconButton
         disabled={currentPage === 1}
         onClick={() => onPageChange(currentPage - 1)}
-        aria-label="Previous page"
+        aria-label="Página anterior"
       >
         <FontAwesomeIcon icon={faAngleLeft} />
       </IconButton>
@@ -73,7 +73,7 @@ export default function Pagination({ totalPages, currentPage, onPageChange }) {
       <IconButton
         disabled={currentPage === totalPages}
         onClick={() => onPageChange(currentPage + 1)}
-        aria-label="Next page"
+        aria-label="Página siguiente"
       >
         <FontAwesomeIcon icon={faAngleRight} />
       </IconButton>

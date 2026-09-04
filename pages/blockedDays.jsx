@@ -1,4 +1,5 @@
 import { useFetch } from "@/hooks/useFetch";
+import { logger } from "@/utils/logger";
 import api from "@/lib/axiosInstance";
 import { useState } from "react";
 import {
@@ -50,6 +51,7 @@ const groupRanges = (data) => {
   return result;
 };
 
+// Página para listar y gestionar todos los días bloqueados registrados
 export default function BlockedDaysPage() {
   const { data: rawDays, refetch: fetchBlockedDays } = useFetch(
     () => api.get("/blocked-days").then((r) => r.data.data || []),
@@ -81,6 +83,7 @@ export default function BlockedDaysPage() {
       setReason("");
       fetchBlockedDays();
     } catch (err) {
+      logger.error("Error al bloquear el día:", err);
       Notification.error(err.response?.data?.message || "Error al bloquear el día");
     } finally {
       setIsBlockingDay(false);
@@ -103,6 +106,7 @@ export default function BlockedDaysPage() {
       setRangeReason("");
       fetchBlockedDays();
     } catch (err) {
+      logger.error("Error al bloquear el rango de días:", err);
       Notification.error(err.response?.data?.message || "Error al bloquear el rango de días");
     } finally {
       setIsBlockingRange(false);
@@ -128,10 +132,11 @@ export default function BlockedDaysPage() {
           Notification.success("Rango eliminado correctamente");
         } else {
           await api.delete(`/blocked-days/${range.ids[0]}`);
-          Notification.success("Día bloqueado eliminado");
+          Notification.success("Día bloqueado eliminado correctamente");
         }
         fetchBlockedDays();
       } catch (err) {
+        logger.error("Error al eliminar el día bloqueado:", err);
         Notification.error(err.response?.data?.message || "Error al eliminar el día bloqueado");
       } finally {
         setModalVisible(false);

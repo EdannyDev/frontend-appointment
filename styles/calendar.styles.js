@@ -1,11 +1,12 @@
 import styled from "@emotion/styled";
 import { keyframes } from "@emotion/react";
+import { STATUS_THEME } from "@/utils/statusTheme";
 
 const STATUS_COLORS = {
-  pending: "#C98A1A",
-  confirmed: "#1D9E75",
-  completed: "#3A7BD5",
-  cancelled: "#D94F4F",
+  pending: STATUS_THEME.PENDING.solid,
+  confirmed: STATUS_THEME.CONFIRMED.solid,
+  completed: STATUS_THEME.COMPLETED.solid,
+  cancelled: STATUS_THEME.CANCELLED.solid,
 };
 
 const dialogEntrance = keyframes`

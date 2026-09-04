@@ -26,6 +26,7 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { formatAppointmentDateTime, formatTodayHeader } from "@/utils/time";
 import { faCalendarDay, faClock, faCircleXmark } from "@fortawesome/free-solid-svg-icons";
 
+// Página para el panel de control del administrador
 export default function AdminDashboard() {
   const { user } = useAuth();
   const [stats, setStats] = useState(null);

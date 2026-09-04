@@ -36,6 +36,7 @@ const MENU = [
   { label: "Perfil", icon: faGear, path: "/profile" }
 ];
 
+// Sidebar para navegar en el lado del administrador
 export default function Sidebar() {
   const router = useRouter();
   const { logout } = useAuth();

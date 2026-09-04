@@ -1,11 +1,12 @@
 import styled from "@emotion/styled";
 import { keyframes } from "@emotion/react";
+import { STATUS_THEME } from "@/utils/statusTheme";
 
 const STATUS_THEMES = {
-  PENDING: { bg: "#573D13", color: "#FFD073" },
-  CONFIRMED: { bg: "#1F5A3C", color: "#5FEEB0" },
-  CANCELLED: { bg: "#5C232A", color: "#FF9D9D" },
-  COMPLETED: { bg: "#1B3E73", color: "#8FC0FF" },
+  PENDING: { bg: STATUS_THEME.PENDING.bg, color: STATUS_THEME.PENDING.text },
+  CONFIRMED: { bg: STATUS_THEME.CONFIRMED.bg, color: STATUS_THEME.CONFIRMED.text },
+  CANCELLED: { bg: STATUS_THEME.CANCELLED.bg, color: STATUS_THEME.CANCELLED.text },
+  COMPLETED: { bg: STATUS_THEME.COMPLETED.bg, color: STATUS_THEME.COMPLETED.text },
 };
 
 const fadeIn = keyframes`

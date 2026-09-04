@@ -25,6 +25,7 @@ import { Notification } from "@/components/notification";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faEnvelope, faArrowLeft } from "@fortawesome/free-solid-svg-icons";
 
+// Página para solicitar el restablecimiento de contraseña
 export default function ForgotPasswordPage() {
   const router = useRouter();
   const [email, setEmail] = useState("");

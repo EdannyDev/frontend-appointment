@@ -23,7 +23,7 @@ It integrates a dynamic calendar system and enforces role-based UI control, comm
 
 - Interactive appointment calendar (FullCalendar)
 - Service selection module
-- Booking & cancellation flow
+- Booking, rescheduling (modal + calendar drag-and-drop) and cancellation flow
 - Administrative control dashboard
 - Business hour configuration interface
 - Blocked-days management (admin)
@@ -34,8 +34,8 @@ It integrates a dynamic calendar system and enforces role-based UI control, comm
 - Two distinct layouts sharing the same design system: a collapsible sidebar for the **Admin panel** and a top navbar for the **Client panel**
 - Reusable, composable components (`modal`, `modalReschedule`, `notification`, `pagination`, `loader`)
 - Centralized Axios instance (`lib/axiosInstance.js`) for API communication
-- Request-level resilience via `lib/withRetry.js`, which retries transient failures (e.g. backend cold starts, unstable connections) with a fixed delay, skipping retries on 401/403 to avoid masking real auth errors
-- Route config centralized in `config/appRoutes.js`, auth state in `context/authContext.js`
+- Request-level resilience via `lib/withRetry.js`, which retries transient failures (e.g. backend cold starts, unstable connections) with a fixed delay, skipping retries on any 4xx response since those already reflect a valid decision from the backend
+- Route config centralized in `config/appRoutes.js`, auth state in `context/authContext.jsx`
 - FullCalendar integration with dynamic view switching
 - Role-based route protection with a global 401 interceptor
 - One dedicated style file per page/component (`*.styles.js`) built on Emotion, plus a shared CSS custom property system (`globals.css`) for consistent theming

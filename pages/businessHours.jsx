@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import { useFetch } from "@/hooks/useFetch";
+import { logger } from "@/utils/logger";
 import api from "@/lib/axiosInstance";
 import {
   Container,
@@ -28,6 +29,7 @@ const DAYS = [
   { id: 6, label: "Sábado" },
 ];
 
+// Página para listar y gestionar todos los horarios laborales registrados
 export default function BusinessHoursPage() {
   const { data: original, refetch: fetchHours } = useFetch(
     () => api.get("/business-hours/admin").then((r) => r.data.data || []),
@@ -108,6 +110,7 @@ export default function BusinessHoursPage() {
       Notification.success(`Horario de ${dayLabel} guardado`);
       fetchHours();
     } catch (err) {
+      logger.error("Error al guardar el horario laboral:", err);
       Notification.error(err.response?.data?.message || "Error al guardar el horario laboral");
     } finally {
       setSavingDay(null);

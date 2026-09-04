@@ -1,5 +1,6 @@
 import { useEffect, useState, useMemo, useCallback } from "react";
 import RescheduleModal from "@/components/modalReschedule";
+import { STATUS_LABELS } from "@/utils/statusLabels";
 import { useAuth } from "@/context/authContext";
 import { logger } from "@/utils/logger";
 import Modal from "@/components/modal";
@@ -69,17 +70,10 @@ import {
 } from "@fortawesome/free-solid-svg-icons";
 import Pagination from "@/components/pagination";
 import { Notification } from "@/components/notification";
+import { useAvailableSlots } from "@/hooks/useAvailableSlots";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 
 const PAGE_SIZE = 5;
-const SLOTS_REFRESH_MS = 60000;
-
-const STATUS_LABELS = {
-  PENDING: "Pendiente",
-  CONFIRMED: "Confirmada",
-  COMPLETED: "Completada",
-  CANCELLED: "Cancelada"
-};
 
 const STATUS_ICONS = {
   PENDING: faClock,
@@ -88,8 +82,7 @@ const STATUS_ICONS = {
   CANCELLED: faTimesCircle
 };
 
-const todayStr = () => new Date().toISOString().split("T")[0];
-
+// Página principal del cliente para gestionar sus citas y ver el resumen de su actividad
 export default function HomePage() {
   const { user } = useAuth();
   const [services, setServices] = useState([]);
@@ -97,31 +90,29 @@ export default function HomePage() {
   const [appointments, setAppointments] = useState([]);
   const [historyPagination, setHistoryPagination] = useState({ totalPages: 1 });
   const [currentPage, setCurrentPage] = useState(1);
-  const [slots, setSlots] = useState([]);
   const [isCreating, setIsCreating] = useState(false);
   const [form, setForm] = useState({ serviceId: "", date: "", slot: "" });
   const [modal, setModal] = useState({ visible: false, message: "", action: null });
   const [rescheduleModal, setRescheduleModal] = useState({ visible: false, appointment: null });
-  const [workingDays, setWorkingDays] = useState(new Set());
   const [stats, setStats] = useState({ active: 0, completed: 0, cancelled: 0 });
+
+  const { slots, isClosedDay, fetchSlots } = useAvailableSlots({
+    serviceId: form.serviceId,
+    date: form.date,
+    enabled: true,
+  });
+
+  useEffect(() => {
+    setForm((prev) =>
+      prev.slot && !slots.includes(prev.slot) ? { ...prev, slot: "" } : prev
+    );
+  }, [slots]);
 
   const getGreeting = useCallback(() => {
     const hour = new Date().getHours();
     if (hour < 12) return "¡Buenos días";
     if (hour < 19) return "¡Buenas tardes";
     return "¡Buenas noches";
-  }, []);
-
-  useEffect(() => {
-    api.get("/business-hours")
-      .then(({ data }) => {
-        const days = new Set(data.data.map((h) => h.day_of_week));
-        setWorkingDays(days);
-      })
-      .catch((err) => {
-        logger.error("Error al cargar los horarios del negocio:", err);
-        Notification.error(err.response?.data?.message || "Error al cargar los horarios del negocio");
-      });
   }, []);
 
   const loadServices = useCallback(async () => {
@@ -194,45 +185,6 @@ export default function HomePage() {
     loadHistory();
   }, [loadOverview, loadHistory]);
 
-  const fetchSlots = useCallback(() => {
-    if (!form.serviceId || !form.date) {
-      setSlots([]);
-      return;
-    }
-    api.get("/appointments/available-slots", {
-      params: { service_id: form.serviceId, date: form.date },
-    })
-      .then((res) => {
-        const available = res.data.data;
-        setSlots(available);
-        setForm((prev) =>
-          prev.slot && !available.includes(prev.slot)
-            ? { ...prev, slot: "" }
-            : prev
-        );
-      })
-      .catch((err) => {
-        logger.error("Error al cargar los horarios disponibles:", err);
-        Notification.error(err.response?.data?.message || "Error al cargar los horarios disponibles");
-      });
-  }, [form.serviceId, form.date]);
-
-  useEffect(() => {
-    fetchSlots();
-  }, [fetchSlots]);
-
-  useEffect(() => {
-    if (form.date !== todayStr()) return;
-    const interval = setInterval(fetchSlots, SLOTS_REFRESH_MS);
-    return () => clearInterval(interval);
-  }, [form.date, fetchSlots]);
-
-  const isClosedDay = (dateStr) => {
-    if (!dateStr || workingDays.size === 0) return false;
-    const dayOfWeek = new Date(dateStr + "T00:00:00").getDay();
-    return !workingDays.has(dayOfWeek);
-  };
-
   const handleDateChange = (e) => {
     const selected = e.target.value;
     if (isClosedDay(selected)) {
@@ -271,17 +223,16 @@ export default function HomePage() {
 
   const resetBookingForm = () => {
     setForm({ serviceId: "", date: "", slot: "" });
-    setSlots([]);
   };
 
   const handleCancelAppointment = (appointment) => {
     setModal({
       visible: true,
-      message: "¿Deseas cancelar tu cita? Recuerda hacerlo con 12h de anticipación.",
+      message: "¿Deseas cancelar tu cita? Recuerda hacerlo con 12 horas de anticipación.",
       action: async () => {
         try {
           await api.put(`/appointments/${appointment.id}/cancel`);
-          Notification.success("Cita cancelada");
+          Notification.success("Cita cancelada correctamente");
           refreshAll();
         } catch (err) {
           logger.error("Error al cancelar la cita:", err);
@@ -435,7 +386,7 @@ export default function HomePage() {
           </StatGrid>
           <TipBox>
             <FontAwesomeIcon icon={faLightbulb} />
-            <span><strong>Tip:</strong> Solo tienes 12 horas de anticipación para cancelar una cita.</span>
+            <span><strong>Tip:</strong> Solo tienes 12 horas de anticipación para cancelar una cita</span>
           </TipBox>
         </StatsCardWrapper>
       </Grid>
@@ -447,7 +398,7 @@ export default function HomePage() {
         {appointments.length === 0 ? (
           <EmptyState>
             <FontAwesomeIcon icon={faCalendarMinus} />
-            No hay citas registradas.
+            No hay citas registradas
           </EmptyState>
         ) : (
           <>

@@ -1,9 +1,10 @@
 import styled from "@emotion/styled";
+import { STATUS_THEME } from "@/utils/statusTheme";
 
 const variants = {
-  today: { bg: "#1B3E73", border: "rgba(58, 123, 213, 0.5)", icon: "#8FC0FF" },
-  pending: { bg: "#573D13", border: "rgba(201, 138, 26, 0.5)", icon: "#FFD073" },
-  cancelled: { bg: "#5C232A", border: "rgba(217, 79, 79, 0.5)", icon: "#FF9D9D" }
+  today: { bg: STATUS_THEME.COMPLETED.bg, border: STATUS_THEME.COMPLETED.border, icon: STATUS_THEME.COMPLETED.text },
+  pending: { bg: STATUS_THEME.PENDING.bg, border: STATUS_THEME.PENDING.border, icon: STATUS_THEME.PENDING.text },
+  cancelled: { bg: STATUS_THEME.CANCELLED.bg, border: STATUS_THEME.CANCELLED.border, icon: STATUS_THEME.CANCELLED.text }
 };
 
 export const Page = styled.div`

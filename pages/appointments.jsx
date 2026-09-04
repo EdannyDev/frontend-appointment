@@ -1,4 +1,5 @@
 import { useEffect, useState, useCallback, useRef } from "react";
+import { STATUS_LABELS } from "@/utils/statusLabels";
 import { logger } from "@/utils/logger";
 import api from "@/lib/axiosInstance";
 import {
@@ -26,15 +27,6 @@ import { Notification } from "@/components/notification";
 import { formatDateShort, formatTime12h } from "@/utils/time";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faUser, faBriefcase, faClock, faCalendar, faSliders, faSearch } from "@fortawesome/free-solid-svg-icons";
-
-const STATUS = ["PENDING", "CONFIRMED", "CANCELLED", "COMPLETED"];
-
-const STATUS_LABELS = {
-  PENDING: "Pendiente",
-  CONFIRMED: "Confirmada",
-  CANCELLED: "Cancelada",
-  COMPLETED: "Completada"
-};
 
 const ALLOWED_TRANSITIONS = {
   PENDING: ["CONFIRMED", "CANCELLED"],
@@ -78,6 +70,7 @@ const getAvailableStatuses = (appointment) => {
   return options.filter((s) => s !== "COMPLETED" || hasOccurred);
 };
 
+// Página para listar y gestionar todas las citas registradas
 export default function AppointmentsPage() {
   const [appointments, setAppointments] = useState([]);
   const [pagination, setPagination] = useState({ page: 1, totalPages: 1, total: 0 });
@@ -179,7 +172,7 @@ export default function AppointmentsPage() {
     if (updatingId) return;
 
     if (getAvailableStatuses(appointment).length === 0) {
-      Notification.info("Esta cita ya no admite cambios de estado.");
+      Notification.info("Esta cita ya no admite cambios de estado");
       return;
     }
 
@@ -225,8 +218,8 @@ export default function AppointmentsPage() {
             onChange={(e) => { setStatusFilter(e.target.value); setCurrentPage(1); }}
           >
             <option value="ALL">Todos los estados</option>
-            {STATUS.map((s) => (
-              <option key={s} value={s}>{STATUS_LABELS[s]}</option>
+              {Object.entries(STATUS_LABELS).map(([key, label]) => (
+            <option key={key} value={key}>{label}</option>
             ))}
           </FilterSelect>
 

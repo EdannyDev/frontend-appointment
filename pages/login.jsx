@@ -27,6 +27,7 @@ import { Notification } from "@/components/notification";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faEnvelope, faEye, faEyeSlash, faLock } from "@fortawesome/free-solid-svg-icons";
 
+// Página para iniciar sesión en la aplicación
 export default function LoginPage() {
   const router = useRouter();
   const [formData, setFormData] = useState({ email: "", password: "" });
@@ -77,7 +78,7 @@ export default function LoginPage() {
       if (res.data.success) {
         const me = await withRetry(() => api.get("/auth/me"));
         const role = me.data.data.role;
-        Notification.success("¡Cuenta reactivada! Bienvenido de nuevo");
+        Notification.success("Cuenta reactivada correctamente. Bienvenido de nuevo.");
         router.push(role === "ADMIN" ? "/dashboard" : "/home");
       }
     } catch (err) {

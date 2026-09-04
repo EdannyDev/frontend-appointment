@@ -1,4 +1,5 @@
 import { useState, useEffect, useCallback } from "react";
+import { STATUS_LABELS } from "@/utils/statusLabels";
 import { useRouter } from "next/router";
 import { logger } from "@/utils/logger";
 import Modal from "@/components/modal";
@@ -37,15 +38,9 @@ import RescheduleModal from "@/components/modalReschedule";
 import { formatDateLong, formatTime12h } from "@/utils/time";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 
-const STATUS_MAP = {
-  PENDING: "Pendiente",
-  CONFIRMED: "Confirmada",
-  COMPLETED: "Completada",
-  CANCELLED: "Cancelada"
-};
-
 const BLOCKED_STATUS = ["CANCELLED", "COMPLETED"];
 
+// Página para mostrar los detalles de una cita específica
 export default function AppointmentDetail() {
   const router = useRouter();
   const { id } = router.query;
@@ -98,7 +93,7 @@ export default function AppointmentDetail() {
             {BLOCKED_STATUS.includes(appointment.status) ? "Detalle de Cita" : "Gestionar Cita"}
           </MainTitle>
           <StatusTag status={appointment.status}>
-            {STATUS_MAP[appointment.status] || appointment.status}
+            {STATUS_LABELS[appointment.status] || appointment.status}
           </StatusTag>
         </TitleRow>
       </HeaderSection>
@@ -173,7 +168,7 @@ export default function AppointmentDetail() {
                   ? "La cita fue completada o cancelada. No se permiten cambios."
                   : !isServiceActive
                     ? "El servicio no está disponible. Puedes mantener tu cita o cancelarla."
-                    : "Solo puedes reprogramar o cancelar tu cita con 12 horas de anticipación."}
+                    : "Solo puedes reprogramar o cancelar tu cita con 12 horas de anticipación"}
               </span>
             </PolicyBox>
           )}
@@ -191,10 +186,7 @@ export default function AppointmentDetail() {
         visible={rescheduleModal}
         appointment={appointment}
         onClose={() => setRescheduleModal(false)}
-        onSuccess={() => {
-          fetchDetail();
-          Notification.success("¡Tu cita se ha reprogramado con éxito!");
-        }}
+        onSuccess={fetchDetail}
       />
     </DetailsWrapper>
   );

@@ -1,4 +1,5 @@
 import { useFetch } from "@/hooks/useFetch";
+import { logger } from "@/utils/logger";
 import api from "@/lib/axiosInstance";
 import { useState } from "react";
 import {
@@ -42,6 +43,7 @@ const normalizeService = (service) => ({
   price: Number(service.price),
 });
 
+// Página para listar y gestionar todos los servicios registrados
 export default function ServicesPage() {
   const [currentPage, setCurrentPage] = useState(1);
 
@@ -89,14 +91,15 @@ export default function ServicesPage() {
           ...payload,
           is_active: editingService.is_active,
         });
-        Notification.success("Servicio actualizado");
+        Notification.success("Servicio actualizado correctamente");
       } else {
         await api.post("/services", payload);
-        Notification.success("Servicio creado");
+        Notification.success("Servicio creado correctamente");
       }
       resetForm();
       fetchServices();
     } catch (err) {
+      logger.error("Error al guardar el servicio:", err);
       Notification.error(err.response?.data?.message || "Error al guardar el servicio");
     } finally {
       setIsSaving(false);
@@ -121,7 +124,7 @@ export default function ServicesPage() {
     try {
       if (service.is_active) {
         await api.delete(`/services/${service.id}`);
-        Notification.warning("Servicio desactivado");
+        Notification.warning("Servicio desactivado correctamente");
       } else {
         await api.put(`/services/${service.id}`, {
           name: service.name,
@@ -130,10 +133,11 @@ export default function ServicesPage() {
           price: Number(service.price),
           is_active: true,
         });
-        Notification.success("Servicio reactivado");
+        Notification.success("Servicio reactivado correctamente");
       }
       fetchServices();
     } catch (err) {
+      logger.error("Error al cambiar el estado del servicio:", err);
       Notification.error(err.response?.data?.message || "No se pudo cambiar el estado del servicio");
     } finally {
       setTogglingId(null);

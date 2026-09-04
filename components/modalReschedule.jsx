@@ -1,4 +1,4 @@
-import { useEffect, useState, useMemo, useCallback } from "react";
+import { useEffect, useState, useMemo } from "react";
 import { logger } from "@/utils/logger";
 import api from "@/lib/axiosInstance";
 import {
@@ -31,6 +31,8 @@ import {
 } from "@fortawesome/free-solid-svg-icons";
 import { formatTime12h } from "@/utils/time";
 import { Notification } from "@/components/notification";
+import { useAvailableSlots } from "@/hooks/useAvailableSlots";
+import { useLockBodyScroll } from "@/hooks/useLockBodyScroll";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 
 const BLOCK_ICONS = {
@@ -39,79 +41,32 @@ const BLOCK_ICONS = {
   noche: faMoon
 };
 
-const SLOTS_REFRESH_MS = 60000;
-const todayStr = () => new Date().toISOString().split("T")[0];
-
 // Modal para reprogramar citas, con selección de fecha y horarios disponibles agrupados por bloque del día
 export default function RescheduleModal({ visible, appointment, onClose, onSuccess }) {
-  const [slots, setSlots] = useState([]);
   const [animationDirection, setAnimationDirection] = useState("right");
   const [currentBlockIndex, setCurrentBlockIndex] = useState(0);
   const [form, setForm] = useState({ date: "", slot: "" });
-  const [workingDays, setWorkingDays] = useState(new Set());
   const [isSubmitting, setIsSubmitting] = useState(false);
 
+  const { slots, isClosedDay, fetchSlots } = useAvailableSlots({
+    serviceId: appointment?.service_id,
+    date: form.date,
+    enabled: visible,
+  });
+
   useEffect(() => {
-    api.get("/business-hours")
-      .then(({ data }) => {
-        const days = new Set(data.data.map((h) => h.day_of_week));
-        setWorkingDays(days);
-      })
-      .catch((err) => {
-        logger.error("Error al cargar horarios del negocio:", err);
-        Notification.error(err.response?.data?.message || "Error al cargar los horarios del negocio");
-      });
-  }, []);
+    setForm((prev) =>
+      prev.slot && !slots.includes(prev.slot) ? { ...prev, slot: "" } : prev
+    );
+  }, [slots]);
 
   useEffect(() => {
     if (!visible || !appointment) return;
     setForm({ date: "", slot: "" });
-    setSlots([]);
     setIsSubmitting(false);
   }, [visible, appointment]);
 
-  useEffect(() => {
-    if (!visible) return;
-      document.documentElement.style.overflow = "hidden";
-      document.body.style.overflow = "hidden";
-    return () => {
-      document.documentElement.style.overflow = "";
-      document.body.style.overflow = "";
-    };
-  }, [visible]);
-
-  const fetchSlots = useCallback(() => {
-    if (!appointment?.service_id || !form.date) {
-      setSlots([]);
-      return;
-    }
-    api.get("/appointments/available-slots", {
-      params: { service_id: appointment.service_id, date: form.date },
-    })
-      .then((res) => {
-        const available = res.data.data;
-        setSlots(available);
-        setForm((prev) =>
-          prev.slot && !available.includes(prev.slot)
-            ? { ...prev, slot: "" }
-            : prev
-        );
-      })
-      .catch((err) => {
-        logger.error("Error al cargar horarios disponibles:", err);
-        Notification.error(err.response?.data?.message || "Error al cargar los horarios disponibles");
-      });
-  }, [appointment, form.date]);
-
-  useEffect(() => {
-    fetchSlots();
-  }, [fetchSlots]);
-
-  useEffect(() => {
-    if (!visible || form.date !== todayStr()) return;
-    const interval = setInterval(fetchSlots, SLOTS_REFRESH_MS);
-    return () => clearInterval(interval);
-  }, [visible, form.date, fetchSlots]);
+  useLockBodyScroll(visible);
 
   const groupedSlots = useMemo(() => {
     const groups = { mañana: [], tarde: [], noche: [] };
@@ -131,12 +86,6 @@ export default function RescheduleModal({ visible, appointment, onClose, onSucce
   useEffect(() => {
     setCurrentBlockIndex(0);
   }, [groupedSlots]);
-
-  const isClosedDay = (dateStr) => {
-    if (!dateStr || workingDays.size === 0) return false;
-    const dayOfWeek = new Date(dateStr + "T00:00:00").getDay();
-    return !workingDays.has(dayOfWeek);
-  };
 
   const handleDateChange = (e) => {
     const selected = e.target.value;

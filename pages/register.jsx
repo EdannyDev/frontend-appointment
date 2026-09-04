@@ -26,9 +26,10 @@ import {
 } from "@/styles/register.styles";
 import { Notification } from "@/components/notification";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { getPasswordStrength, STRENGTH_LABELS, STRENGTH_COLORS } from "@/utils/passwordStrength";
 import { faUser, faEnvelope, faLock, faEyeSlash, faEye } from "@fortawesome/free-solid-svg-icons";
+import { getPasswordStrength, exceedsMaxPasswordLength, STRENGTH_LABELS, STRENGTH_COLORS } from "@/utils/passwordStrength";
 
+// Página para registrarse en la aplicación
 export default function RegisterPage() {
   const router = useRouter();
   const [formData, setFormData] = useState({ name: "", email: "", password: "" });
@@ -51,7 +52,7 @@ export default function RegisterPage() {
     try {
       const res = await withRetry(() => api.post("/auth/register", formData));
       if (res.data.success) {
-        Notification.success("Cuenta creada correctamente. Redirigendo...");
+        Notification.success("Cuenta creada correctamente. Redirigiendo...");
         setTimeout(() => router.push("/login"), 2000);
       }
     } catch (err) {
@@ -147,7 +148,9 @@ export default function RegisterPage() {
                     ))}
                   </StrengthBar>
                   <StrengthLabel color={STRENGTH_COLORS[strength]}>
-                    {STRENGTH_LABELS[strength]}
+                    {exceedsMaxPasswordLength(formData.password)
+                      ? "La contraseña no puede superar los 72 caracteres"
+                      : STRENGTH_LABELS[strength]}
                   </StrengthLabel>
                 </>
               )}

@@ -36,6 +36,7 @@ const MENU = [
   { label: "Calendario", path: "/calendar", icon: faCalendarDays }
 ];
 
+// Navbar para navegar en el lado del cliente
 export default function Navbar() {
   const router = useRouter();
   const { logout } = useAuth();

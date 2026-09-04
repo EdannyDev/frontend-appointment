@@ -21,6 +21,7 @@ const ROLE_HOME = {
   CLIENT: "/home",
 };
 
+// Controla los layouts y la autorización de rutas según el rol del usuario
 function LayoutResolver({ Component, pageProps }) {
   const router = useRouter();
   const { pathname } = router;

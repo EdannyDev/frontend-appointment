@@ -13,6 +13,7 @@ import { PUBLIC_ROUTES } from "@/config/appRoutes";
 
 const AuthContext = createContext(null);
 
+// Proveedor para autenticación y manejo de sesión
 export const AuthProvider = ({ children }) => {
   const router = useRouter();
   const [user, setUser] = useState(null);

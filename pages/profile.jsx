@@ -47,7 +47,7 @@ import {
 } from "@fortawesome/free-solid-svg-icons";
 import { Notification } from "@/components/notification";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { getPasswordStrength, STRENGTH_LABELS, STRENGTH_COLORS } from "@/utils/passwordStrength";
+import { getPasswordStrength, exceedsMaxPasswordLength, STRENGTH_LABELS, STRENGTH_COLORS } from "@/utils/passwordStrength";
 
 const getInitials = (name = "") =>
   name
@@ -58,6 +58,7 @@ const getInitials = (name = "") =>
     .map((w) => w[0].toUpperCase())
     .join("");
 
+// Página para que el usuario pueda gestionar su perfil, cambiar su contraseña y desactivar su cuenta
 export default function ProfilePage() {
   const router = useRouter();
   const { user, logout, fetchUser } = useAuth();
@@ -83,7 +84,11 @@ export default function ProfilePage() {
 
   const profileChanged = useMemo(() => {
     if (name === null || email === null || !user) return false;
-    return name.trim() !== (user.name || "") || email.trim() !== (user.email || "");
+      const trimmedName = name.trim();
+      const trimmedEmail = email.trim();
+      const nameChanged = trimmedName !== "" && trimmedName !== (user.name || "");
+      const emailChanged = trimmedEmail !== "" && trimmedEmail !== (user.email || "");
+    return nameChanged || emailChanged;
   }, [name, email, user]);
 
   const strength = useMemo(() => getPasswordStrength(newPassword), [newPassword]);
@@ -159,7 +164,7 @@ export default function ProfilePage() {
     <Page>
       <PageHeader>
         <PageTitle>Configuración de perfil</PageTitle>
-        <PageSubtitle>Gestiona tu perfil de manera sencilla. Si deseas desactivar tu cuenta, piensalo cuidadosamente.</PageSubtitle>
+        <PageSubtitle>Gestiona tu perfil de manera sencilla. Si deseas desactivar tu cuenta, piénsalo cuidadosamente.</PageSubtitle>
       </PageHeader>
 
       <Divider />
@@ -292,7 +297,9 @@ export default function ProfilePage() {
                   ))}
                 </StrengthBar>
                 <StrengthLabel color={STRENGTH_COLORS[strength]}>
-                  {STRENGTH_LABELS[strength]}
+                  {exceedsMaxPasswordLength(newPassword)
+                    ? "La contraseña no puede superar los 72 caracteres"
+                    : STRENGTH_LABELS[strength]}
                 </StrengthLabel>
               </>
             )}
@@ -355,7 +362,7 @@ export default function ProfilePage() {
       <Modal
         visible={deactivateModal}
         title="Desactivando cuenta"
-        message="¿Deseas desactivar tu cuenta? Piensalo dos veces antes de continuar."
+        message="¿Deseas desactivar tu cuenta? Piénsalo dos veces antes de continuar."
         onConfirm={handleDeactivate}
         onCancel={() => setDeactivateModal(false)}
       />

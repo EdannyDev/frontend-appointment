@@ -1,4 +1,5 @@
 import styled from "@emotion/styled";
+import { STATUS_THEME } from "@/utils/statusTheme";
 
 export const DetailsWrapper = styled.div`
   max-width: 900px;
@@ -209,22 +210,8 @@ export const SecondaryAction = styled(BaseButton)`
 `;
 
 export const StatusTag = styled.span`
-  background: ${(props) =>
-    ({
-      PENDING: "#573D13",
-      CONFIRMED: "#1F5A3C",
-      COMPLETED: "#1B3E73",
-      CANCELLED: "#5C232A",
-    }[props.status])
-  };
-  color: ${(props) =>
-    ({
-      PENDING: "#FFD073",
-      CONFIRMED: "#5FEEB0",
-      COMPLETED: "#8FC0FF",
-      CANCELLED: "#FF9D9D",
-    }[props.status])
-  };
+  background: ${(props) => STATUS_THEME[props.status]?.bg};
+  color: ${(props) => STATUS_THEME[props.status]?.text};
   padding: 0.5rem 1rem;
   border-radius: 99px;
   font-weight: 700;

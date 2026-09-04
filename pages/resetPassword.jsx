@@ -27,8 +27,9 @@ import {
 import { Notification } from "@/components/notification";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faLock, faEye, faEyeSlash, faArrowLeft } from "@fortawesome/free-solid-svg-icons";
-import { getPasswordStrength, STRENGTH_LABELS, STRENGTH_COLORS } from "@/utils/passwordStrength";
+import { getPasswordStrength, exceedsMaxPasswordLength, STRENGTH_LABELS, STRENGTH_COLORS } from "@/utils/passwordStrength";
 
+// Página para el restablecimiento de contraseña
 export default function ResetPasswordPage() {
   const router = useRouter();
   const { token } = router.query;
@@ -81,8 +82,8 @@ export default function ResetPasswordPage() {
             <Title>Nueva contraseña</Title>
             <Subtitle>
               {tokenValid
-                ? "Elige una contraseña segura para tu cuenta."
-                : "El enlace es inválido o ha expirado."}
+                ? "Elige una contraseña segura para tu cuenta"
+                : "El enlace es inválido o ha expirado"}
             </Subtitle>
           </Header>
 
@@ -139,7 +140,9 @@ export default function ResetPasswordPage() {
                         ))}
                       </StrengthBar>
                       <StrengthLabel color={STRENGTH_COLORS[strength]}>
-                        {STRENGTH_LABELS[strength]}
+                        {exceedsMaxPasswordLength(newPassword)
+                          ? "La contraseña no puede superar los 72 caracteres"
+                          : STRENGTH_LABELS[strength]}
                       </StrengthLabel>
                     </>
                   )}

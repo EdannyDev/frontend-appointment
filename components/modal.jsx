@@ -1,4 +1,5 @@
-import { useState, useEffect } from "react";import {
+import { useState } from "react";
+import {
   Overlay,
   Dialog,
   DialogTitle,
@@ -9,6 +10,7 @@ import { useState, useEffect } from "react";import {
   ConfirmAction,
   CancelAction,
 } from "@/styles/modal.styles";
+import { useLockBodyScroll } from "@/hooks/useLockBodyScroll";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faTriangleExclamation } from "@fortawesome/free-solid-svg-icons";
 
@@ -22,15 +24,7 @@ export default function Modal({
 }) {
   const [isConfirming, setIsConfirming] = useState(false);
 
-  useEffect(() => {
-    if (!visible) return;
-      document.documentElement.style.overflow = "hidden";
-      document.body.style.overflow = "hidden";
-    return () => {
-      document.documentElement.style.overflow = "";
-      document.body.style.overflow = "";
-    };
-  }, [visible]);
+  useLockBodyScroll(visible);
 
   if (!visible) return null;
 

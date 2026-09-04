@@ -1,4 +1,5 @@
 import { useState, useCallback, useMemo, useEffect } from "react";
+import { STATUS_LABELS } from "@/utils/statusLabels";
 import { useRouter } from "next/router";
 import { logger } from "@/utils/logger";
 import dynamic from "next/dynamic";
@@ -24,16 +25,11 @@ import timegridPlugin from "@fullcalendar/timegrid";
 import esLocale from "@fullcalendar/core/locales/es";
 import { Notification } from "@/components/notification";
 import interactionPlugin from "@fullcalendar/interaction";
+import { useLockBodyScroll } from "@/hooks/useLockBodyScroll";
 
 const FullCalendar = dynamic(() => import("@fullcalendar/react"), { ssr: false });
 
-const STATUS_LABELS = {
-  PENDING: "Pendiente",
-  CONFIRMED: "Confirmada",
-  COMPLETED: "Completada",
-  CANCELLED: "Cancelada",
-};
-
+// Página del calendario interactivo para que el usuario pueda ver y gestionar sus citas
 export default function Calendar() {
   const router = useRouter();
   const [selectedEvent, setSelectedEvent] = useState(null);
@@ -87,15 +83,7 @@ export default function Calendar() {
     }
   }, []);
 
-  useEffect(() => {
-    if (!selectedEvent) return;
-      document.documentElement.style.overflow = "hidden";
-      document.body.style.overflow = "hidden";
-    return () => {
-      document.documentElement.style.overflow = "";
-      document.body.style.overflow = "";
-    };
-  }, [selectedEvent]);
+  useLockBodyScroll(!!selectedEvent);
 
   const calendarOptions = useMemo(() => ({
     plugins: [daygridPlugin, timegridPlugin, interactionPlugin, listPlugin],
