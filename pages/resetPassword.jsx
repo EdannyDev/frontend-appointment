@@ -82,8 +82,8 @@ export default function ResetPasswordPage() {
             <Title>Nueva contraseña</Title>
             <Subtitle>
               {tokenValid
-                ? "Elige una contraseña segura para tu cuenta"
-                : "El enlace es inválido o ha expirado"}
+                ? "Elige una contraseña segura para tu cuenta."
+                : "El enlace es inválido o ha expirado."}
             </Subtitle>
           </Header>
 

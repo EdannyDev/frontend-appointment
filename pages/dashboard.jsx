@@ -57,7 +57,7 @@ export default function AdminDashboard() {
     <Page>
       <Header>
         <Welcome>¡Hola de nuevo, {user?.name}!</Welcome>
-        <Subtitle>Administra tus citas y mantén el control del negocio de forma sencilla</Subtitle>
+        <Subtitle>Administra tus citas y mantén el control del negocio de forma sencilla.</Subtitle>
         <DateText>{formatTodayHeader()}</DateText>
       </Header>
 
