@@ -88,7 +88,7 @@ cp .env.example .env.local
 
 | Variable               | Description                              | Example                     |
 |-------------------------|-------------------------------------------|------------------------------|
-| `NEXT_PUBLIC_API_URL`  | Base URL of the backend REST API          | `https://backend-appointment-0eqz.onrender.com/api/v2` |
+| `NEXT_PUBLIC_API_URL`  | Base URL of the backend REST API          | `http://localhost:5000/api/v2`|
 
 ### Running the App
 
