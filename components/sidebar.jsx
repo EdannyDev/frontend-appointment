@@ -59,7 +59,7 @@ export default function Sidebar() {
 
       <SidebarContainer mobileOpen={mobileOpen}>
         <Logo mobileOpen={mobileOpen}>
-          <SidebarLabel mobileOpen={mobileOpen}>Gestor de Citas</SidebarLabel>
+          <SidebarLabel mobileOpen={mobileOpen}>Lockstep</SidebarLabel>
           <SidebarToggle
             mobileOpen={mobileOpen}
             aria-label={mobileOpen ? "Contraer menú" : "Expandir menú"}

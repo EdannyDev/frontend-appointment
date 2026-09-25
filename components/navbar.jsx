@@ -112,7 +112,7 @@ export default function Navbar() {
       <LeftSection>
         <FontAwesomeIcon icon={faCalendarDays} />
         <Divider>|</Divider>
-        <Brand>Gestor de Citas</Brand>
+        <Brand>Lockstep</Brand>
       </LeftSection>
 
       <RightSection ref={dropdownRef}>

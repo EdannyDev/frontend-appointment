@@ -1,10 +1,10 @@
-# 🚀 Appointment Management System – Frontend
+# 🚀 Lockstep – Frontend
 
-A responsive, role-aware scheduling interface built with **Next.js**, designed to consume the [Appointment Management Backend API](https://github.com/EdannyDev/backend-appointment) and provide a smooth booking experience for both clients and administrators.
+A responsive, role-aware scheduling interface built with **Next.js**, designed to consume the [Lockstep Backend API](https://github.com/EdannyDev/backend-appointment) and provide a smooth booking experience for both clients and administrators.
 
 ## 📌 Overview
 
-Appointment Management Frontend is a Next.js application that provides an interactive scheduling interface with real-time availability visualization.
+Lockstep Frontend is a Next.js application that provides an interactive scheduling interface with real-time availability visualization.
 
 It integrates a dynamic calendar system and enforces role-based UI control, communicating with the backend exclusively through a REST API secured with HttpOnly cookies. Built as a portfolio project to demonstrate end-to-end ownership of a real scheduling flow: role-based UI, a fully responsive layout, and a clean, single-token theming system rather than scattered ad-hoc styles.
 
@@ -115,7 +115,7 @@ The interface is fully responsive from a 768px breakpoint down to mobile, coveri
 
 Deployed on [Vercel](https://vercel.com), consuming the backend API deployed on [Render](https://render.com):
 
-**[gestor-citas-edannydev.vercel.app](https://gestor-citas-edannydev.vercel.app/login)**
+**[lockstep-edannydev.vercel.app](https://lockstep-edannydev.vercel.app)**
 
 ---
 
