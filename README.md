@@ -54,7 +54,7 @@ The application emphasizes clarity, responsiveness and scheduling usability.
 
 | Category         | Technologies |
 |-------------------|--------------|
-| Framework          | Next.js 14, React 18 |
+| Framework          | Next.js 15, React 18 |
 | Styling            | Emotion (styled + react) |
 | Calendar           | FullCalendar (core, daygrid, timegrid, list, interaction) |
 | Icons              | FontAwesome (solid, regular, react) |
@@ -66,7 +66,7 @@ The application emphasizes clarity, responsiveness and scheduling usability.
 
 ### Prerequisites
 
-- Node.js 18+
+- Node.js 24.22.1 or newer (24.x LTS)
 - Yarn
 - The [backend API](https://github.com/EdannyDev/backend-appointment) running locally or deployed
 
